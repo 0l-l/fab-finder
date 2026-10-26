@@ -272,17 +272,6 @@ The page now uses Roboto, with Noto Sans SC for Chinese since Roboto doesn't hav
 **Summary of the UI requests** (Claude wrote this at the end to sum up my two messages above; I didn't send it as a prompt):
 > A Flask web page for Fab Finder. Very minimal, black and white, everything centered. One big input in the middle where you say what you need, and a small, clear menu on the side (Ask, Add a note, Team notes). Roboto font with a matching Chinese font, and plenty of space so the advice card is easy to read. When adding a note, show the five areas plus "Other," which you can name yourself.
 
-### Step 10: README and prompt log
-
-> 这些你都帮我写一下吧，我参考
-> [Please write all of these for me; I'll use them as a reference.]
-
-Claude drafted the README using the numbers from my runs, and marked that I have to rewrite the first four sections in my own words. [Add what you changed when you rewrote them.]
-
-> 好，你把prompt log写一下
-> [OK, write the prompt log.]
-
-Claude wrote this log from our conversation. I asked it to make the English simpler and use more paragraphs, then read through it and edited it.
 
 ---
 
