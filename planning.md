@@ -40,9 +40,10 @@ A tool for an Entertainment Technology team building physical installations: des
 ## 4. Two semantic queries
 
 ### Query 1
-- Query: "我要在木桌面中间挖一个很圆的大圆" ("I need to cut a big, very round circle out of the middle of a wooden tabletop")
-- Expected result: paragraphs about Hole saw, Circle cutter, or CNC router
-- Why keyword search would fail: the query is in Chinese and the articles are in English; and even translated, "cut a circle" never contains the technical term "hole saw"
+- Query: "我要在木板中间开一个圆形的洞，用来穿电线" ("I need to open a round hole in the middle of a wooden board to run wires through")
+- Expected result: Hole saw (rank 1, cosine distance 0.662)
+- Why keyword search would fail: the query is in Chinese and the articles are in English, so they share no words at all
+- History: the first phrasing, "我要在木桌面中间挖一个很圆的大圆" ("cut a big, very round circle out of the middle of a wooden tabletop"), ranked Hole saw only 10th; Pencil milling came first. It stressed "big" and "round" rather than the purpose. Rephrasing it around what we actually need the hole for fixed it. (A truly big circle is also a job for a jigsaw or router, which is what the old phrasing returned.)
 
 ### Query 2
 - Query: "一个能感应到有人从屏幕前走过的小零件" ("a small part that can sense someone walking past the screen")
