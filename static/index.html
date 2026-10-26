@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fab Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #ffffff;
+    --ink: #000000;
+    --quiet: #6e6e6e;
+    --hairline: #dadada;
+    --serif: "Newsreader", "Noto Serif SC", Georgia, serif;
+    --column: 34rem;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { font-size: 18px; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Menu ---------- */
+
+  .menu {
+    position: fixed;
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .menu button {
+    all: unset;
+    cursor: pointer;
+    font-family: var(--serif);
+    font-size: 1rem;
+    color: var(--quiet);
+    padding: 0.1rem 0;
+    border-bottom: 1px solid transparent;
+    width: fit-content;
+  }
+
+  .menu button:hover { color: var(--ink); }
+
+  .menu button[aria-current="page"] {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+
+  /* ---------- Page ---------- */
+
+  .page {
+    max-width: var(--column);
+    margin: 0 auto;
+    padding: 18vh 1.25rem 4rem;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+
+  .lede {
+    margin: 0.35rem 0 3.5rem;
+    color: var(--quiet);
+    font-size: 1rem;
+  }
+
+  /* ---------- The big line you write on ---------- */
+
+  .write {
+    display: block;
+    width: 100%;
+    resize: none;
+    overflow: hidden;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.35;
+    text-align: center;
+    padding: 0.2rem 0 0.5rem;
+  }
+
+  .write::placeholder { color: #b4b4b4; }
+
+  .write:focus {
+    outline: none;
+    border-bottom-width: 2px;
+    padding-bottom: calc(0.5rem - 1px);
+  }
+
+  .write.small { font-size: 1.35rem; }
+
+  .hint {
+    margin: 0.9rem 0 1.8rem;
+    color: var(--quiet);
+    font-size: 0.9rem;
+  }
+
+  .action {
+    font-family: var(--serif);
+    font-size: 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    padding: 0.55rem 1.6rem;
+    cursor: pointer;
+  }
+
+  .action:disabled { opacity: 0.45; cursor: default; }
+
+  .plain {
+    all: unset;
+    cursor: pointer;
+    font-family: var(--serif);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+  .write:focus-visible { outline: none; }
+
+  /* ---------- Result ---------- */
+
+  .result { margin-top: 3.5rem; }
+
+  .result.shown { animation: appear 0.45s ease-out; }
+
+  @keyframes appear {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .card {
+    text-align: left;
+    line-height: 1.7;
+  }
+
+  .card h1, .card h2, .card h3, .card h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-style: normal;
+    margin: 2rem 0 0.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .card > :first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+
+  .card ul, .card ol { padding-left: 1.2rem; margin: 0.4rem 0; }
+  .card li { margin: 0.35rem 0; }
+  .card p { margin: 0.5rem 0; }
+
+  .card code {
+    font-family: var(--serif);
+    font-style: italic;
+    background: none;
+  }
+
+  .cite {
+    font-size: 0.7em;
+    line-height: 0;
+    margin-left: 0.15em;
+    color: var(--quiet);
+  }
+
+  .cite a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .cite a:hover { border-bottom-color: var(--ink); }
+
+  .message { color: var(--ink); font-size: 1.05rem; }
+  .error { color: var(--ink); font-style: italic; }
+
+  .sources {
+    margin-top: 2.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--ink);
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  .sources h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+  }
+
+  .sources ol { list-style: none; padding: 0; margin: 0; }
+  .sources li { margin: 0.3rem 0; display: flex; gap: 0.6rem; }
+  .sources .n { min-width: 1.4rem; color: var(--quiet); }
+  .sources a { color: var(--ink); }
+  .sources .note-text { display: block; color: var(--quiet); font-style: italic; }
+
+  .sources details { margin-top: 1rem; color: var(--quiet); }
+  .sources summary { cursor: pointer; }
+  .sources details li a { color: var(--quiet); }
+
+  /* ---------- Add a note ---------- */
+
+  .field { margin: 0 0 2.2rem; }
+
+  .field-label {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: var(--quiet);
+    font-size: 0.9rem;
+  }
+
+  .domains {
+    border: 0;
+    padding: 0;
+    margin: 0 0 2.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1.2rem;
+  }
+
+  .domains legend { padding: 0; margin: 0 auto 0.6rem; color: var(--quiet); font-size: 0.9rem; }
+
+  .domains label {
+    cursor: pointer;
+    color: var(--quiet);
+    border-bottom: 1px solid transparent;
+  }
+
+  .domains input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .domains input:checked + span { color: var(--ink); border-bottom: 1px solid var(--ink); }
+  .domains input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .domains span { padding-bottom: 0.05rem; }
+
+  .name {
+    width: 14rem;
+    max-width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    background: transparent;
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    text-align: center;
+    padding: 0.2rem 0;
+    color: var(--ink);
+  }
+
+  .name:focus { outline: none; border-bottom-color: var(--ink); }
+
+  .status { min-height: 1.6rem; margin-top: 1.2rem; }
+
+  /* ---------- Team notes ---------- */
+
+  .notes-list { list-style: none; padding: 0; margin: 0; }
+
+  .notes-list li {
+    padding: 1.2rem 0;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .notes-list li:first-child { border-top: 0; }
+  .notes-list p { margin: 0; font-size: 1.1rem; line-height: 1.55; }
+  .notes-list .meta { margin-top: 0.35rem; color: var(--quiet); font-size: 0.85rem; }
+
+  .empty { color: var(--quiet); }
+
+  footer {
+    margin-top: 5rem;
+    color: var(--quiet);
+    font-size: 0.8rem;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ---------- Phones ---------- */
+
+  @media (max-width: 760px) {
+    .menu {
+      position: static;
+      transform: none;
+      flex-direction: row;
+      justify-content: center;
+      gap: 1.4rem;
+      padding: 1.5rem 1rem 0;
+    }
+    .page { padding-top: 3.5rem; }
+    .write { font-size: 1.6rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result.shown { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="menu" aria-label="Sections">
+  <button type="button" data-view="ask" aria-current="page">Ask</button>
+  <button type="button" data-view="add">Add a note</button>
+  <button type="button" data-view="notes">Team notes</button>
+</nav>
+
+<main class="page">
+  <h1>Fab Finder</h1>
+  <p class="lede">Say what it needs to do. Find out what it's called.</p>
+
+  <!-- Ask -->
+  <section id="view-ask">
+    <form id="ask-form">
+      <label class="visually-hidden" for="query">What do you need?</label>
+      <textarea id="query" class="write" rows="1" maxlength="1000" autofocus></textarea>
+      <p class="hint">Describe what it should do and where it goes, in English or Chinese.</p>
+      <button class="action" type="submit" id="ask-button">Find it</button>
+    </form>
+    <div id="result" class="result" aria-live="polite"></div>
+  </section>
+
+  <!-- Add a note -->
+  <section id="view-add" hidden>
+    <form id="note-form">
+      <div class="field">
+        <label class="visually-hidden" for="note-text">Note</label>
+        <textarea id="note-text" class="write small" rows="1" maxlength="1000"
+          placeholder="What did you buy, where did you get it made, what worked?"></textarea>
+      </div>
+
+      <fieldset class="domains field" id="domains">
+        <legend>Area</legend>
+      </fieldset>
+
+      <div class="field">
+        <label class="field-label" for="author">Your name</label>
+        <input id="author" class="name" type="text" maxlength="60" autocomplete="name">
+      </div>
+
+      <button class="action" type="submit" id="note-button">Save note</button>
+      <p class="status" id="note-status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <!-- Team notes -->
+  <section id="view-notes" hidden>
+    <ul class="notes-list" id="notes-list"></ul>
+  </section>
+
+  <footer id="stats"></footer>
+</main>
+
+<script>
+  const DOMAIN_NAMES = {
+    woodworking: "Woodworking",
+    electronics: "Electronics",
+    hardware: "Hardware",
+    lighting_display: "Lighting and display",
+    audio: "Audio",
+  };
+
+  const EXAMPLES = [
+    "我要在木板中间开一个圆形的洞，用来穿电线",
+    "一个能感应到有人从屏幕前走过的小零件",
+    "Make sound audible only right in front of the screen",
+  ];
+
+  const $ = (id) => document.getElementById(id);
+
+  function esc(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Grow a textarea to fit its text, so it reads as one line you write on.
+  // When it's empty, size it to the placeholder so a long example isn't cut off.
+  function autoGrow(el) {
+    const empty = !el.value;
+    if (empty) el.value = el.placeholder;
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+    if (empty) el.value = "";
+  }
+
+  // Enter submits, Shift+Enter adds a line. Ignore Enter while an IME
+  // (e.g. Chinese pinyin input) is still composing a word.
+  function submitOnEnter(el, form) {
+    el.addEventListener("input", () => autoGrow(el));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+  }
+
+  async function api(path, options = {}) {
+    let response;
+    try {
+      response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+    } catch (_) {
+      // fetch only throws when it can't reach the server at all.
+      throw new Error("Can't reach the Fab Finder server. Run python server.py, then open http://127.0.0.1:5000.");
+    }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `The server answered ${response.status}.`);
+    return data;
+  }
+
+  /* ---------- Menu ---------- */
+
+  function show(view) {
+    for (const button of document.querySelectorAll(".menu button")) {
+      if (button.dataset.view === view) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    }
+    for (const name of ["ask", "add", "notes"]) $(`view-${name}`).hidden = name !== view;
+    if (view === "ask") $("query").focus();
+    if (view === "add") { autoGrow($("note-text")); $("note-text").focus(); }
+    if (view === "notes") loadNotes();
+  }
+
+  document.querySelectorAll(".menu button").forEach((button) =>
+    button.addEventListener("click", () => show(button.dataset.view)));
+
+  /* ---------- Ask ---------- */
+
+  // A small markdown renderer for what the model writes: headings, bullet and
+  // numbered lists, paragraphs, **bold**, *italic* and `code`. Text is escaped
+  // first, so nothing in the model's answer can inject HTML.
+  function inline(text) {
+    return esc(text)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/`(.+?)`/g, "<code>$1</code>")
+      .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, "$1<em>$2</em>");
+  }
+
+  function renderMarkdown(text) {
+    const html = [];
+    let list = null;          // "ul" or "ol" while inside a list
+    let paragraph = [];
+
+    const closeParagraph = () => {
+      if (paragraph.length) html.push(`<p>${inline(paragraph.join(" "))}</p>`);
+      paragraph = [];
+    };
+    const closeList = () => {
+      if (list) html.push(`</${list}>`);
+      list = null;
+    };
+
+    for (const raw of text.split("\n")) {
+      const line = raw.trim();
+      let m;
+      if (!line) {
+        closeParagraph(); closeList();
+      } else if ((m = line.match(/^#{1,6}\s+(.*)$/))) {
+        closeParagraph(); closeList();
+        html.push(`<h3>${inline(m[1])}</h3>`);
+      } else if ((m = line.match(/^[-*•]\s+(.*)$/)) || (m = line.match(/^\d+[.)]\s+(.*)$/))) {
+        closeParagraph();
+        const type = /^\d/.test(line) ? "ol" : "ul";
+        if (list !== type) { closeList(); html.push(`<${type}>`); list = type; }
+        html.push(`<li>${inline(m[1])}</li>`);
+      } else {
+        closeList();
+        paragraph.push(line);
+      }
+    }
+    closeParagraph(); closeList();
+    return html.join("");
+  }
+
+  // Turn [1] or [1][5] in the card into small links to the matching sources.
+  function linkCitations(html) {
+    return html.replace(/(?:\[\d+\])+/g, (group) => {
+      const links = [...group.matchAll(/\d+/g)]
+        .map(([n]) => `<a href="#src-${n}">${n}</a>`)
+        .join(", ");
+      return `<sup class="cite">${links}</sup>`;
+    });
+  }
+
+  function sourceItem(s) {
+    const name = s.url
+      ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`
+      : esc(s.label);
+    const noteText = s.text ? `<span class="note-text">${esc(s.text)}</span>` : "";
+    return `<li id="src-${s.n}"><span class="n">${s.n}</span><span>${name}${noteText}</span></li>`;
+  }
+
+  function renderSources(sources, allUsed) {
+    const used = allUsed ? sources : sources.filter((s) => s.cited);
+    const unused = allUsed ? [] : sources.filter((s) => !s.cited);
+    let html = `<div class="sources"><h2>${allUsed ? "Closest matches" : "Sources"}</h2>`;
+    html += `<ol>${used.map(sourceItem).join("")}</ol>`;
+    if (unused.length) {
+      html += `<details><summary>Also found, not used (${unused.length})</summary>`;
+      html += `<ol>${unused.map(sourceItem).join("")}</ol></details>`;
+    }
+    return html + "</div>";
+  }
+
+  function showResult(html) {
+    const result = $("result");
+    result.classList.remove("shown");
+    result.innerHTML = html;
+    void result.offsetWidth;          // restart the fade-in
+    result.classList.add("shown");
+  }
+
+  $("ask-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const query = $("query").value.trim();
+    if (!query) { $("query").focus(); return; }
+
+    const button = $("ask-button");
+    button.disabled = true;
+    button.textContent = "Finding…";
+    $("result").innerHTML = "";
+
+    try {
+      const data = await api("/api/advise", { method: "POST", body: JSON.stringify({ query }) });
+      if (data.status === "no_match") {
+        showResult(`<p class="message">${esc(data.message)}</p>`);
+      } else if (data.status === "fallback") {
+        showResult(`<p class="error">${esc(data.message)}</p>` + renderSources(data.sources, true));
+      } else {
+        showResult(`<div class="card">${linkCitations(renderMarkdown(data.card))}</div>`
+          + renderSources(data.sources, false));
+      }
+    } catch (error) {
+      showResult(`<p class="error">${esc(error.message)}</p>`);
+    } finally {
+      button.disabled = false;
+      button.textContent = "Find it";
+    }
+  });
+
+  /* ---------- Add a note ---------- */
+
+  function buildDomainChoices(domains) {
+    const fieldset = $("domains");
+    domains.forEach((domain, i) => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="radio" name="domain" value="${esc(domain)}" ${i === 0 ? "checked" : ""}>`
+        + `<span>${esc(DOMAIN_NAMES[domain] || domain)}</span>`;
+      fieldset.appendChild(label);
+    });
+  }
+
+  $("note-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = $("note-text").value.trim();
+    const status = $("note-status");
+    if (!text) { status.textContent = "Write the note first."; $("note-text").focus(); return; }
+
+    const domain = document.querySelector('input[name="domain"]:checked')?.value || "";
+    const author = $("author").value.trim();
+    try { localStorage.setItem("fab-finder-author", author); } catch (_) { /* storage unavailable */ }
+
+    const button = $("note-button");
+    button.disabled = true;
+    try {
+      await api("/api/notes", { method: "POST", body: JSON.stringify({ text, domain, author }) });
+      $("note-text").value = "";
+      autoGrow($("note-text"));
+      status.textContent = "Saved. It will show up in searches right away.";
+      loadStats();
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  /* ---------- Team notes ---------- */
+
+  function formatDate(iso) {
+    const date = new Date(iso + "T00:00:00");
+    return isNaN(date) ? iso : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  async function loadNotes() {
+    const list = $("notes-list");
+    list.innerHTML = "";
+    try {
+      const notes = await api("/api/notes");
+      if (!notes.length) {
+        list.innerHTML = `<li class="empty">No team notes yet. Add one after your next build or purchase.</li>`;
+        return;
+      }
+      list.innerHTML = notes.map((n) => `
+        <li>
+          <p>${esc(n.text)}</p>
+          <div class="meta">${esc(n.author)}, ${esc(DOMAIN_NAMES[n.domain] || n.domain)}, ${esc(formatDate(n.date))}</div>
+        </li>`).join("");
+    } catch (error) {
+      list.innerHTML = `<li class="error">${esc(error.message)}</li>`;
+    }
+  }
+
+  /* ---------- Start ---------- */
+
+  async function loadStats() {
+    try {
+      const s = await api("/api/stats");
+      const notes = s.notes === 1 ? "1 team note" : `${s.notes} team notes`;
+      $("stats").textContent = `Searching ${s.wikipedia.toLocaleString()} Wikipedia passages and ${notes}.`;
+      return s;
+    } catch (error) {
+      $("stats").textContent = error.message;
+      return null;
+    }
+  }
+
+  (async () => {
+    $("query").placeholder = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+    submitOnEnter($("query"), $("ask-form"));
+    submitOnEnter($("note-text"), $("note-form"));
+    autoGrow($("query"));
+    // Size again once the web fonts have loaded, since they change line widths.
+    document.fonts?.ready.then(() => autoGrow($("query")));
+    try { $("author").value = localStorage.getItem("fab-finder-author") || ""; } catch (_) { /* storage unavailable */ }
+
+    const s = await loadStats();
+    buildDomainChoices(s ? s.domains : Object.keys(DOMAIN_NAMES));
+  })();
+</script>
+</body>
+</html>

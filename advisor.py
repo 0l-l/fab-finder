@@ -114,28 +114,23 @@ def format_sources_for_model(wiki, notes):
     return "\n\n".join(lines)
 
 
-def format_sources_for_user(wiki, notes, card):
-    """Sources list built by this code (not the model), with the same numbering.
+def source_entries(wiki, notes, card):
+    """Sources built by this code (not the model), numbered like the model saw them.
 
-    Sources the card actually cites are listed first; the rest were retrieved
-    but judged not relevant by the model.
+    'cited' marks the sources the card actually refers to with [n].
     """
     cited = {int(n) for n in re.findall(r"\[(\d+)\]", card)}
     entries = []
     for i, item in enumerate(wiki, start=1):
         meta = item["meta"]
-        entries.append((i, f"{meta['title']} - {meta['url']}", item["distance"]))
+        entries.append({"n": i, "kind": "wikipedia", "label": meta["title"], "url": meta["url"],
+                        "text": "", "distance": round(item["distance"], 3), "cited": i in cited})
     for i, item in enumerate(notes, start=len(wiki) + 1):
         meta = item["meta"]
-        entries.append((i, f"Team note by {meta['author']}, {meta['date']}", item["distance"]))
-
-    lines = ["Sources:"]
-    lines += [f"  [{i}] {label}  (distance {dist:.3f})" for i, label, dist in entries if i in cited]
-    unused = [f"  [{i}] {label}  (distance {dist:.3f})" for i, label, dist in entries if i not in cited]
-    if unused:
-        lines.append("Also retrieved, but not used:")
-        lines += unused
-    return "\n".join(lines)
+        entries.append({"n": i, "kind": "note", "label": f"Team note by {meta['author']}, {meta['date']}",
+                        "url": "", "text": item["text"], "distance": round(item["distance"], 3),
+                        "cited": i in cited})
+    return entries
 
 
 def no_match_message(query):
@@ -146,24 +141,16 @@ def no_match_message(query):
             "and where it's used (e.g. 'open a round hole in a board for cables'), not just its shape.")
 
 
-def fallback_message(error, wiki, notes):
-    """What to show if the model can't be reached: the raw retrieval results."""
-    lines = [f"(Couldn't reach the AI model: {error})", "", "Closest matches in the database:"]
-    for item in wiki:
-        lines.append(f"  - {item['meta']['title']}  (distance {item['distance']:.3f})")
-    for item in notes:
-        meta = item["meta"]
-        lines.append(f"  - Team note by {meta['author']}, {meta['date']}: {item['text']}")
-    return "\n".join(lines)
+def build_advice(query):
+    """Retrieve, then build the advice card. Returns a dict used by both the CLI and the website:
 
-
-def advise(query):
-    """Return the full advice card text for a user's description of what they need."""
+    {"status": "ok" | "no_match" | "fallback", "card": str, "message": str, "sources": [...]}
+    """
     wiki, notes = retrieve(query)
 
     best_wiki = wiki[0]["distance"] if wiki else float("inf")
     if best_wiki > THRESHOLD and not notes:
-        return no_match_message(query)
+        return {"status": "no_match", "card": "", "message": no_match_message(query), "sources": []}
 
     user_message = f"Request: {query}\n\nSources:\n{format_sources_for_model(wiki, notes)}"
     try:
@@ -177,9 +164,34 @@ def advise(query):
         )
         card = response.choices[0].message.content.strip()
     except OpenAIError as error:
-        return fallback_message(error, wiki, notes)
+        # Show what the database found, even though the model couldn't be reached.
+        return {"status": "fallback", "card": "",
+                "message": f"Couldn't reach the AI model: {error}",
+                "sources": source_entries(wiki, notes, "")}
 
-    return f"{card}\n\n{format_sources_for_user(wiki, notes, card)}"
+    return {"status": "ok", "card": card, "message": "", "sources": source_entries(wiki, notes, card)}
+
+
+def advise(query):
+    """Advice card as plain text, for the command line."""
+    result = build_advice(query)
+    if result["status"] == "no_match":
+        return result["message"]
+
+    def line(s):
+        extra = f": {s['text']}" if s["text"] else (f" - {s['url']}" if s["url"] else "")
+        return f"  [{s['n']}] {s['label']}{extra}  (distance {s['distance']:.3f})"
+
+    if result["status"] == "fallback":
+        return "\n".join([f"({result['message']})", "", "Closest matches in the database:"]
+                         + [line(s) for s in result["sources"]])
+
+    used = [line(s) for s in result["sources"] if s["cited"]]
+    unused = [line(s) for s in result["sources"] if not s["cited"]]
+    parts = [result["card"], "", "Sources:"] + used
+    if unused:
+        parts += ["Also retrieved, but not used:"] + unused
+    return "\n".join(parts)
 
 
 if __name__ == "__main__":
