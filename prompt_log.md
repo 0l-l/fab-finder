@@ -61,7 +61,7 @@ Next, activating the virtual environment failed with "running scripts is disable
 ### Step 3: Smoke test
 
 **Prompt:**
-> I'm starting a new Python project called fab-finder on Windows (PowerShell, Python 3.13, venv). I have chromadb 1.5.9 and sentence-transformers [version] installed.
+> I'm starting a new Python project called fab-finder on Windows (PowerShell, Python 3.13, venv). I have chromadb 1.5.9 and sentence-transformers installed.
 >
 > Write smoke_test.py that:
 > 1. Creates chromadb.PersistentClient(path="./chroma_store") so data is saved to disk.
