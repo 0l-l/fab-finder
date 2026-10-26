@@ -12,16 +12,21 @@ from datetime import date
 
 from db import get_collection
 
+# The standard areas. A note can also use its own area name (e.g. "Paint and finishes").
 DOMAINS = ["woodworking", "electronics", "hardware", "lighting_display", "audio"]
+MAX_DOMAIN_CHARS = 40
 
 
 def add_note(text, domain, author):
     """Add one note and return its id. It is searchable as soon as this returns."""
     text = text.strip()
+    domain = domain.strip()
     if not text:
         raise ValueError("Note text is empty.")
-    if domain not in DOMAINS:
-        raise ValueError(f"Domain must be one of {DOMAINS}, got {domain!r}.")
+    if not domain:
+        raise ValueError("Choose an area, or name your own.")
+    if len(domain) > MAX_DOMAIN_CHARS:
+        raise ValueError(f"Keep the area name under {MAX_DOMAIN_CHARS} characters.")
 
     # uuid ids are always unique, so Chroma never silently ignores a new note
     # because of a duplicate id.

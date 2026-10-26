@@ -38,12 +38,18 @@ def describe_need():
 
 
 def choose_domain():
+    other = len(DOMAINS) + 1
     for number, domain in enumerate(DOMAINS, start=1):
         print(f"  {number}. {domain}")
+    print(f"  {other}. other (name your own)")
     while True:
-        choice = ask(f"Domain (1-{len(DOMAINS)}): ")
+        choice = ask(f"Area (1-{other}): ")
         if choice.isdigit() and 1 <= int(choice) <= len(DOMAINS):
             return DOMAINS[int(choice) - 1]
+        if choice == str(other):
+            custom = ask("Name the area: ")
+            if custom:
+                return custom
         print("Please enter one of the numbers above.")
 
 
